@@ -1,0 +1,7 @@
+# Finales de línea normalizados en el repositorio
+* text=auto
+gradlew text eol=lf
+*.bat text eol=crlf
+*.png binary
+*.jpg binary
+*.webp binary

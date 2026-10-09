@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Carpetas que la app puede compartir con otras apps (FileProvider). -->
+<paths>
+    <!-- Reportes PDF generados al exportar un vehículo. -->
+    <cache-path name="reportes" path="reportes/" />
+    <!-- Fotos de tickets y documentos: la cámara escribe aquí la foto tomada. -->
+    <files-path name="fotos" path="fotos/" />
+</paths>
