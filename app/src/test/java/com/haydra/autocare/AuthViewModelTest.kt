@@ -1,5 +1,6 @@
 package com.haydra.autocare
 
+import com.haydra.autocare.data.DemoData
 import com.haydra.autocare.data.repository.FakeAuthRepository
 import com.haydra.autocare.ui.auth.AuthViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -15,7 +16,7 @@ import org.junit.Test
 /**
  * Prueba de integración ViewModel + Repository (AUTOCARE.txt, sección 35:
  * "Login → ViewModel → Repository") para el flujo de registro e inicio de
- * sesión (HU01, HU02), usando FakeAuthRepository como sustituto de Supabase.
+ * sesión (HU01, HU02), usando FakeAuthRepository como sustituto de Firebase.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class AuthViewModelTest {
@@ -99,5 +100,29 @@ class AuthViewModelTest {
 
         assertNull(viewModel.currentUser.value)
         assertTrue(viewModel.loginState.value.errorMessage != null)
+    }
+
+    @Test
+    fun `restablecer contrasena envia el enlace al correo de la cuenta`() = runTest(mainDispatcherRule.testDispatcher) {
+        val viewModel = AuthViewModel(FakeAuthRepository())
+
+        viewModel.onForgotCorreoChange(" ${DemoData.CORREO} ")
+        viewModel.sendPasswordReset()
+        advanceUntilIdle()
+
+        assertEquals(DemoData.CORREO, viewModel.forgotPasswordState.value.enviadoA)
+        assertNull(viewModel.forgotPasswordState.value.errorMessage)
+    }
+
+    @Test
+    fun `restablecer contrasena con correo invalido no envia nada`() = runTest(mainDispatcherRule.testDispatcher) {
+        val viewModel = AuthViewModel(FakeAuthRepository())
+
+        viewModel.onForgotCorreoChange("no-es-correo")
+        viewModel.sendPasswordReset()
+        advanceUntilIdle()
+
+        assertNull(viewModel.forgotPasswordState.value.enviadoA)
+        assertNotNull(viewModel.forgotPasswordState.value.correoError)
     }
 }

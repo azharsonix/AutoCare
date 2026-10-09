@@ -66,14 +66,11 @@ data class ChangePasswordUiState(
 @Immutable
 data class ForgotPasswordUiState(
     val correo: String = "",
-    val nueva: String = "",
-    val confirmacion: String = "",
     val correoError: String? = null,
-    val nuevaError: String? = null,
-    val confirmacionError: String? = null,
     val isSaving: Boolean = false,
     val errorMessage: String? = null,
-    val savedSuccessfully: Boolean = false
+    /** Correo al que se envió el enlace; null mientras no se ha enviado. */
+    val enviadoA: String? = null
 )
 
 /**
@@ -282,31 +279,24 @@ class AuthViewModel(
         _forgotPasswordState.update { it.copy(correo = correo, correoError = null, errorMessage = null) }
     }
 
-    fun onForgotNuevaChange(nueva: String) {
-        _forgotPasswordState.update { it.copy(nueva = nueva, nuevaError = null, errorMessage = null) }
-    }
-
-    fun onForgotConfirmacionChange(confirmacion: String) {
-        _forgotPasswordState.update { it.copy(confirmacion = confirmacion, confirmacionError = null, errorMessage = null) }
-    }
-
-    fun resetPassword() {
+    /** Pide a Firebase que envíe el enlace para restablecer la contraseña. */
+    fun sendPasswordReset() {
         val estado = _forgotPasswordState.value
         val correoError = AuthValidator.validateCorreo(estado.correo)
-        val nuevaError = AuthValidator.validatePassword(estado.nueva)
-        val confirmacionError = AuthValidator.validateConfirmacion(estado.nueva, estado.confirmacion)
-        if (correoError != null || nuevaError != null || confirmacionError != null) {
-            _forgotPasswordState.update {
-                it.copy(correoError = correoError, nuevaError = nuevaError, confirmacionError = confirmacionError)
-            }
+        if (correoError != null) {
+            _forgotPasswordState.update { it.copy(correoError = correoError) }
             return
         }
 
         _forgotPasswordState.update { it.copy(isSaving = true, errorMessage = null) }
         viewModelScope.launch {
-            authRepository.resetPassword(estado.correo, estado.nueva)
-                .onSuccess { _forgotPasswordState.value = ForgotPasswordUiState(savedSuccessfully = true) }
+            authRepository.sendPasswordReset(estado.correo)
+                .onSuccess { _forgotPasswordState.value = ForgotPasswordUiState(enviadoA = estado.correo.trim()) }
                 .onFailure { error -> _forgotPasswordState.update { it.copy(isSaving = false, errorMessage = error.message) } }
         }
+    }
+
+    fun clearForgotPassword() {
+        _forgotPasswordState.value = ForgotPasswordUiState()
     }
 }
