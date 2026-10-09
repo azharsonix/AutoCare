@@ -5,7 +5,7 @@ import com.haydra.autocare.data.model.Vehicle
 /**
  * Contrato de administración de vehículos (RF04-RF07, RF17). La app usa
  * [RoomVehicleRepository] y las pruebas [FakeVehicleRepository]; en el Sprint 6 se añadirá
- * una implementación respaldada por la tabla "vehiculos" de Supabase (AUTOCARE.txt, sección 32).
+ * una implementación respaldada por la colección "vehiculos" de Cloud Firestore (AUTOCARE.txt, sección 32).
  */
 interface VehicleRepository {
     suspend fun getVehicles(usuarioId: String): Result<List<Vehicle>>

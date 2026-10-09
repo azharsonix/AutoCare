@@ -6,7 +6,7 @@ import java.time.LocalDate
 /**
  * Contrato de administración de gastos (RF11-RF13, RF18). La app usa
  * [RoomExpenseRepository] y las pruebas [FakeExpenseRepository]; en el Sprint 6 se añadirá
- * una implementación respaldada por la tabla "gastos" de Supabase (AUTOCARE.txt, sección 32).
+ * una implementación respaldada por la colección "gastos" de Cloud Firestore (AUTOCARE.txt, sección 32).
  */
 interface ExpenseRepository {
     suspend fun getExpenses(vehiculoId: String): Result<List<Expense>>

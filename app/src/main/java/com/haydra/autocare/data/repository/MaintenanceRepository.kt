@@ -6,7 +6,7 @@ import java.time.LocalDate
 /**
  * Contrato de administración de mantenimientos (RF08-RF10, RF18). La app usa
  * [RoomMaintenanceRepository] y las pruebas [FakeMaintenanceRepository]; en el Sprint 6 se
- * añadirá una implementación respaldada por la tabla "mantenimientos" de Supabase
+ * añadirá una implementación respaldada por la colección "mantenimientos" de Cloud Firestore
  * (AUTOCARE.txt, sección 32).
  */
 interface MaintenanceRepository {

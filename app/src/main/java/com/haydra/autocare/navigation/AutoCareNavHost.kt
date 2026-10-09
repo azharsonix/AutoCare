@@ -295,8 +295,7 @@ fun AutoCareNavHost(
         composable(AutoCareDestinations.FORGOT_PASSWORD) {
             ForgotPasswordScreen(
                 viewModel = authViewModel,
-                onBack = { navController.popBackStack() },
-                onResetSuccess = { navController.popBackStack() }
+                onBack = { navController.popBackStack() }
             )
         }
         composable(AutoCareDestinations.REGISTER) {

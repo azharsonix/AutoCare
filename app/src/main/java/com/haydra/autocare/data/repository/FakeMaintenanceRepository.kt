@@ -10,7 +10,7 @@ import kotlinx.coroutines.delay
  * Implementación en memoria de [MaintenanceRepository], usada por las pruebas unitarias (la app
  * usa la versión Room, ver AppContainer). Antes de Room era la única y servía
  * mientras no existiera un
- * proyecto de Supabase. Guarda los mantenimientos en memoria, asociados al
+ * proyecto de Firebase. Guarda los mantenimientos en memoria, asociados al
  * vehículo al que pertenecen. Se precargan un par de ejemplos para el primer
  * vehículo de la cuenta demo (ver [DemoData]).
  */

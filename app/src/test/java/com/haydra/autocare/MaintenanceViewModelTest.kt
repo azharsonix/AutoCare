@@ -16,7 +16,7 @@ import org.junit.Test
 /**
  * Prueba de integración ViewModel + Repository (AUTOCARE.txt, sección 35)
  * del módulo de mantenimientos (RF08-RF10), usando FakeMaintenanceRepository
- * como sustituto de Supabase.
+ * como sustituto de Firebase.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class MaintenanceViewModelTest {

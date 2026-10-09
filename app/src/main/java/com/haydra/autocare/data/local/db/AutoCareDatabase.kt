@@ -22,7 +22,7 @@ class Converters {
 /**
  * Base de datos local de AutoCare (requisito no funcional de Persistencia).
  * Sustituye a los repositorios Fake* en memoria: los datos sobreviven al
- * cerrar la app. Cuando se conecte Supabase podrá usarse como caché offline.
+ * cerrar la app. Con la sincronización a Firestore funcionará como caché sin conexión.
  */
 @Database(
     entities = [

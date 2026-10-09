@@ -16,7 +16,7 @@ import org.junit.Test
 /**
  * Prueba de integración ViewModel + Repository (AUTOCARE.txt, sección 35)
  * del módulo de gastos (RF11-RF13), usando FakeExpenseRepository como
- * sustituto de Supabase.
+ * sustituto de Firebase.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class ExpenseViewModelTest {
