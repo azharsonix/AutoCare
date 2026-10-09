@@ -22,3 +22,7 @@ local.properties
 .kotlin/
 /.idea/deploymentTargetSelector.xml
 /.idea/deviceManager.xml
+
+# Llaves de firma (nunca se suben)
+*.jks
+*.keystore
