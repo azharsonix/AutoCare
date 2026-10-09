@@ -84,11 +84,10 @@ class FakeAuthRepository : AuthRepository {
         return Result.success(Unit)
     }
 
-    override suspend fun resetPassword(correo: String, newPassword: String): Result<Unit> {
+    override suspend fun sendPasswordReset(correo: String): Result<Unit> {
         delay(300)
-        val almacenado = buscarPorCorreo(correo)
+        buscarPorCorreo(correo)
             ?: return Result.failure(IllegalStateException("No existe una cuenta con ese correo"))
-        usuariosPorId[almacenado.user.id] = almacenado.copy(password = newPassword)
         return Result.success(Unit)
     }
 

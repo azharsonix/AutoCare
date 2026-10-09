@@ -1,6 +1,8 @@
 package com.haydra.autocare
 
 import android.content.Context
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.haydra.autocare.data.export.ExportadorReporte
 import com.haydra.autocare.data.local.AlmacenFotos
 import com.haydra.autocare.data.local.PlanStore
@@ -14,7 +16,7 @@ import com.haydra.autocare.data.repository.DocumentoRepository
 import com.haydra.autocare.data.repository.ExpenseRepository
 import com.haydra.autocare.data.repository.MaintenanceRepository
 import com.haydra.autocare.data.repository.ReminderRepository
-import com.haydra.autocare.data.repository.RoomAuthRepository
+import com.haydra.autocare.data.repository.FirebaseAuthRepository
 import com.haydra.autocare.data.repository.RoomDocumentoRepository
 import com.haydra.autocare.data.repository.RoomExpenseRepository
 import com.haydra.autocare.data.repository.RoomMaintenanceRepository
@@ -27,15 +29,17 @@ import com.haydra.autocare.ui.common.Mensajes
 
 /**
  * Inyección de dependencias manual: crea una sola vez la base de datos y los
- * repositorios que usan los ViewModels. Para cambiar a Supabase basta con
- * sustituir aquí las implementaciones.
+ * repositorios que usan los ViewModels. La autenticación va con Firebase;
+ * los datos de los vehículos siguen en Room.
  */
 class AppContainer(context: Context) {
     private val appContext = context.applicationContext
 
     val database: AutoCareDatabase by lazy { AutoCareDatabase.create(appContext) }
 
-    val authRepository: AuthRepository by lazy { RoomAuthRepository(database.userDao()) }
+    val authRepository: AuthRepository by lazy {
+        FirebaseAuthRepository(FirebaseAuth.getInstance(), FirebaseFirestore.getInstance(), database.userDao())
+    }
     val vehicleRepository: VehicleRepository by lazy { RoomVehicleRepository(database.vehicleDao()) }
     val maintenanceRepository: MaintenanceRepository by lazy { RoomMaintenanceRepository(database.maintenanceDao()) }
     val expenseRepository: ExpenseRepository by lazy { RoomExpenseRepository(database.expenseDao()) }

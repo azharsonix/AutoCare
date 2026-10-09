@@ -16,7 +16,7 @@ import org.junit.Test
 /**
  * Prueba de integración ViewModel + Repository (AUTOCARE.txt, sección 35)
  * del módulo de recordatorios (RF15-RF16, HU08), usando FakeReminderRepository
- * como sustituto de Supabase.
+ * como sustituto de Firebase.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class ReminderViewModelTest {

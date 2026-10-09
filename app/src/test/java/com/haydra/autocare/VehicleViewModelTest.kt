@@ -15,7 +15,7 @@ import org.junit.Test
 /**
  * Prueba de integración ViewModel + Repository (AUTOCARE.txt, sección 35)
  * del módulo de vehículos (RF04-RF07), usando FakeVehicleRepository como
- * sustituto de Supabase.
+ * sustituto de Firebase.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class VehicleViewModelTest {

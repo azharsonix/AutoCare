@@ -2,9 +2,8 @@ package com.haydra.autocare.ui.auth
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.text.input.ImeAction
@@ -12,63 +11,55 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.haydra.autocare.ui.components.AutoCarePrimaryButton
 import com.haydra.autocare.ui.components.AutoCareTextField
 import com.haydra.autocare.ui.components.MensajeError
+import com.haydra.autocare.ui.components.MensajeExito
 
 /**
- * Restablecer contraseña (HU02). Como todavía no existe un proyecto de
- * Supabase que envíe un correo de restablecimiento, se pide directamente el
- * correo y la nueva contraseña; cuando se conecte Supabase Auth esto se
- * reemplazará por el flujo real de enlace por correo.
+ * Restablecer contraseña (HU02). Firebase Authentication envía al correo un enlace
+ * donde el usuario elige su contraseña nueva; después vuelve a iniciar sesión.
  */
 @Composable
 fun ForgotPasswordScreen(
     viewModel: AuthViewModel,
-    onBack: () -> Unit,
-    onResetSuccess: () -> Unit
+    onBack: () -> Unit
 ) {
     val estado by viewModel.forgotPasswordState.collectAsState()
 
-    LaunchedEffect(estado.savedSuccessfully) {
-        if (estado.savedSuccessfully) onResetSuccess()
+    DisposableEffect(Unit) {
+        onDispose { viewModel.clearForgotPassword() }
     }
 
     PantallaAcceso(
         titulo = "Recupera tu acceso",
-        subtitulo = "Escribe el correo de tu cuenta y elige una contraseña nueva.",
+        subtitulo = "Escribe el correo de tu cuenta y te enviaremos un enlace para elegir una contraseña nueva.",
         onBack = onBack
     ) {
-        AutoCareTextField(
-            value = estado.correo,
-            onValueChange = viewModel::onForgotCorreoChange,
-            label = "Correo electrónico",
-            errorText = estado.correoError,
-            keyboardType = KeyboardType.Email,
-            leadingIcon = Icons.Filled.Email
-        )
-        AutoCareTextField(
-            value = estado.nueva,
-            onValueChange = viewModel::onForgotNuevaChange,
-            label = "Nueva contraseña",
-            errorText = estado.nuevaError,
-            isPassword = true,
-            leadingIcon = Icons.Filled.Lock
-        )
-        AutoCareTextField(
-            value = estado.confirmacion,
-            onValueChange = viewModel::onForgotConfirmacionChange,
-            label = "Repite la contraseña",
-            errorText = estado.confirmacionError,
-            isPassword = true,
-            leadingIcon = Icons.Filled.Lock,
-            imeAction = ImeAction.Done,
-            onImeAction = viewModel::resetPassword
-        )
+        val enviadoA = estado.enviadoA
+        if (enviadoA == null) {
+            AutoCareTextField(
+                value = estado.correo,
+                onValueChange = viewModel::onForgotCorreoChange,
+                label = "Correo electrónico",
+                errorText = estado.correoError,
+                keyboardType = KeyboardType.Email,
+                leadingIcon = Icons.Filled.Email,
+                imeAction = ImeAction.Done,
+                onImeAction = viewModel::sendPasswordReset
+            )
 
-        MensajeError(estado.errorMessage)
+            MensajeError(estado.errorMessage)
 
-        AutoCarePrimaryButton(
-            text = "Restablecer contraseña",
-            onClick = viewModel::resetPassword,
-            loading = estado.isSaving
-        )
+            AutoCarePrimaryButton(
+                text = "Enviar enlace",
+                onClick = viewModel::sendPasswordReset,
+                loading = estado.isSaving
+            )
+        } else {
+            MensajeExito("Si $enviadoA tiene una cuenta, te llegará un enlace en unos minutos. Revisa también la carpeta de spam.")
+
+            AutoCarePrimaryButton(
+                text = "Volver a iniciar sesión",
+                onClick = onBack
+            )
+        }
     }
 }
