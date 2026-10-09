@@ -20,7 +20,7 @@ class DemoSeedCallback : RoomDatabase.Callback() {
         try {
             db.execSQL(
                 "INSERT INTO usuarios (id, nombre, correo, password_hash) VALUES (?, ?, ?, ?)",
-                arrayOf(DemoData.USER_ID, DemoData.NOMBRE, DemoData.CORREO, PasswordHasher.hash(DemoData.PASSWORD))
+                arrayOf<Any?>(DemoData.USER_ID, DemoData.NOMBRE, DemoData.CORREO, PasswordHasher.hash(DemoData.PASSWORD))
             )
 
             insertarVehiculo(db, DemoData.VEHICLE_1_ID, "Toyota", "Corolla", 2022, "Rojo", "ABC-123", 15000.0)
@@ -54,7 +54,7 @@ class DemoSeedCallback : RoomDatabase.Callback() {
         db.execSQL(
             "INSERT INTO vehiculos (id, usuario_id, marca, modelo, anio, color, placas, kilometraje, km_actualizado) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            arrayOf(id, DemoData.USER_ID, marca, modelo, anio, color, placas, kilometraje, LocalDate.now().toEpochDay())
+            arrayOf<Any?>(id, DemoData.USER_ID, marca, modelo, anio, color, placas, kilometraje, LocalDate.now().toEpochDay())
         )
     }
 
@@ -65,7 +65,7 @@ class DemoSeedCallback : RoomDatabase.Callback() {
         db.execSQL(
             "INSERT INTO mantenimientos (id, vehiculo_id, tipo, fecha, kilometraje, costo, descripcion) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?)",
-            arrayOf(nuevoId(), DemoData.VEHICLE_1_ID, tipo, fecha.toEpochDay(), kilometraje, costo, descripcion)
+            arrayOf<Any?>(nuevoId(), DemoData.VEHICLE_1_ID, tipo, fecha.toEpochDay(), kilometraje, costo, descripcion)
         )
     }
 
@@ -76,21 +76,21 @@ class DemoSeedCallback : RoomDatabase.Callback() {
         db.execSQL(
             "INSERT INTO gastos (id, vehiculo_id, categoria, monto, fecha, descripcion, litros, kilometraje) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            arrayOf(nuevoId(), DemoData.VEHICLE_1_ID, categoria, monto, fecha.toEpochDay(), descripcion, litros, km)
+            arrayOf<Any?>(nuevoId(), DemoData.VEHICLE_1_ID, categoria, monto, fecha.toEpochDay(), descripcion, litros, km)
         )
     }
 
     private fun insertarDocumento(db: SupportSQLiteDatabase, tipo: String, vence: LocalDate?, notas: String) {
         db.execSQL(
             "INSERT INTO documentos (id, vehiculo_id, tipo, vence, notas) VALUES (?, ?, ?, ?, ?)",
-            arrayOf(nuevoId(), DemoData.VEHICLE_1_ID, tipo, vence?.toEpochDay(), notas)
+            arrayOf<Any?>(nuevoId(), DemoData.VEHICLE_1_ID, tipo, vence?.toEpochDay(), notas)
         )
     }
 
     private fun insertarRecordatorio(db: SupportSQLiteDatabase, titulo: String, fecha: LocalDate, kilometraje: Double?) {
         db.execSQL(
             "INSERT INTO recordatorios (id, vehiculo_id, titulo, fecha, kilometraje, completado) VALUES (?, ?, ?, ?, ?, 0)",
-            arrayOf(nuevoId(), DemoData.VEHICLE_1_ID, titulo, fecha.toEpochDay(), kilometraje)
+            arrayOf<Any?>(nuevoId(), DemoData.VEHICLE_1_ID, titulo, fecha.toEpochDay(), kilometraje)
         )
     }
 
