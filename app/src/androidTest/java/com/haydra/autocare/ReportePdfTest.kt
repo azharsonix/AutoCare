@@ -33,7 +33,7 @@ class ReportePdfTest {
 
     @Test
     fun reporte_sin_registros_cabe_en_una_pagina() {
-        val paginas = paginasDe(DatosReporte(vehiculo, "Ana", emptyList(), emptyList(), emptyList(), hoy))
+        val paginas = paginasDe(DatosReporte(vehiculo, "Ana", emptyList(), emptyList(), emptyList(), fecha = hoy))
         assertTrue("páginas = $paginas", paginas == 1)
     }
 
@@ -47,7 +47,7 @@ class ReportePdfTest {
         }
         val recordatorios = listOf(Reminder("r1", "v1", "Cambio de aceite", hoy.plusMonths(3), 85_000.0, false))
 
-        val paginas = paginasDe(DatosReporte(vehiculo, "Ana", mantenimientos, gastos, recordatorios, hoy))
+        val paginas = paginasDe(DatosReporte(vehiculo, "Ana", mantenimientos, gastos, recordatorios, fecha = hoy))
         assertTrue("páginas = $paginas", paginas >= 3)
     }
 }
