@@ -10,7 +10,7 @@ import kotlinx.coroutines.delay
  * Implementación en memoria de [VehicleRepository], usada por las pruebas unitarias (la app
  * usa la versión Room, ver AppContainer). Antes de Room era la única y servía
  * mientras no existiera un proyecto
- * de Supabase. Guarda los vehículos en memoria, asociados al usuarioId que los
+ * de Firebase. Guarda los vehículos en memoria, asociados al usuarioId que los
  * creó. Se precargan dos vehículos de ejemplo para la cuenta demo (ver [DemoData]).
  */
 class FakeVehicleRepository : VehicleRepository {

@@ -6,7 +6,7 @@ import java.time.LocalDate
 /**
  * Contrato de administración de recordatorios (RF15-RF16, RF18). La app usa
  * [RoomReminderRepository] y las pruebas [FakeReminderRepository]; en el Sprint 6 se añadirá
- * una implementación respaldada por la tabla "recordatorios" de Supabase
+ * una implementación respaldada por la colección "recordatorios" de Cloud Firestore
  * (AUTOCARE.txt, sección 32).
  */
 interface ReminderRepository {

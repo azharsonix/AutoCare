@@ -14,8 +14,8 @@ import com.haydra.autocare.data.model.Vehicle
 import java.time.LocalDate
 
 /**
- * Tablas locales de AutoCare. Siguen los mismos nombres que las tablas de
- * Supabase descritas en AUTOCARE.txt (sección 32), para que la futura
+ * Tablas locales de AutoCare. Siguen los mismos nombres que las colecciones de
+ * Cloud Firestore (antes tablas de AUTOCARE.txt, sección 32), para que la futura
  * sincronización sea un mapeo directo. Las llaves foráneas con CASCADE
  * cumplen RF17-RF18: al eliminar un usuario o vehículo se eliminan sus
  * registros asociados.
