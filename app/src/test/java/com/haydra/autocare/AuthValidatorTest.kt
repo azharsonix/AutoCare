@@ -42,6 +42,12 @@ class AuthValidatorTest {
     }
 
     @Test
+    fun `sin aceptar el aviso de privacidad no se puede registrar`() {
+        assertNotNull(AuthValidator.validateAviso(false))
+        assertNull(AuthValidator.validateAviso(true))
+    }
+
+    @Test
     fun `suma de control de sanidad del entorno de pruebas`() {
         assertEquals(4, 2 + 2)
     }

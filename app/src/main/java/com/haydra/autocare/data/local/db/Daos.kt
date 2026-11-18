@@ -22,6 +22,10 @@ interface UserDao {
 
         @Update
     suspend fun update(user: UserEntity)
+
+    /** Las llaves foráneas en cascada borran también sus vehículos y registros. */
+    @Query("DELETE FROM usuarios WHERE id = :id")
+    suspend fun deleteById(id: String)
 }
 
 @Dao

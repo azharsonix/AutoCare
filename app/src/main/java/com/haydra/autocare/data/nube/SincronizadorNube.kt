@@ -30,6 +30,13 @@ import kotlinx.coroutines.sync.withLock
  *   que solo está en el teléfono se sube. En las siguientes veces, lo que falta en la nube es porque
  *   se borró desde otro teléfono, y se borra aquí también.
  */
+/** Lo que hay que limpiar en el teléfono cuando se borra una cuenta. */
+data class DatosLocalesUsuario(
+    val recordatorios: List<String>,
+    val documentos: List<String>,
+    val fotos: List<String>
+)
+
 class SincronizadorNube(
     context: Context,
     private val auth: FirebaseAuth,
@@ -161,6 +168,46 @@ class SincronizadorNube(
             }
             preferencias.edit { putBoolean(claveSubida, true) }
         }
+    }
+
+    /** Ids de los avisos programados y nombres de las fotos del usuario, antes de borrar su cuenta. */
+    suspend fun datosLocales(usuarioId: String): DatosLocalesUsuario {
+        val vehiculos = database.vehicleDao().getByUsuario(usuarioId)
+        val mantenimientos = vehiculos.flatMap { database.maintenanceDao().getByVehiculo(it.id) }
+        val gastos = vehiculos.flatMap { database.expenseDao().getByVehiculo(it.id) }
+        val recordatorios = vehiculos.flatMap { database.reminderDao().getByVehiculo(it.id) }
+        val documentos = vehiculos.flatMap { database.documentoDao().getByVehiculo(it.id) }
+        return DatosLocalesUsuario(
+            recordatorios = recordatorios.map { it.id },
+            documentos = documentos.map { it.id },
+            fotos = (mantenimientos.map { it.foto } + gastos.map { it.foto } + documentos.map { it.foto }).filterNotNull()
+        )
+    }
+
+    /**
+     * Borra de Firestore todos los vehículos y registros del usuario. Pide los documentos al
+     * servidor, así que sin conexión falla y la cuenta no se toca.
+     */
+    suspend fun borrarDeLaNube(): Result<Unit> = runCatching {
+        candado.withLock {
+            val base = raiz() ?: throw IllegalStateException("Tu sesión expiró, vuelve a iniciar sesión")
+            val uid = base.id
+            val referencias = (listOf(MapeoNube.VEHICULOS) + MapeoNube.DE_VEHICULO).flatMap { nombre ->
+                base.collection(nombre).get(Source.SERVER).await().documents.map { it.reference }
+            }
+            referencias.chunked(LIMITE_LOTE).forEach { grupo ->
+                firestore.batch().apply { grupo.forEach(::delete) }.commit().await()
+            }
+            // Si después fallara el borrado de la cuenta, la siguiente sincronización vuelve a subir lo
+            // del teléfono en lugar de tomar la nube vacía como borrados.
+            preferencias.edit { remove("subida_inicial_$uid") }
+        }
+    }
+
+    /** Quita las notificaciones programadas de los registros de una cuenta ya borrada. */
+    fun cancelarAvisos(datos: DatosLocalesUsuario) {
+        datos.recordatorios.forEach(reminderScheduler::cancel)
+        datos.documentos.forEach(documentoScheduler::cancel)
     }
 
     private companion object {

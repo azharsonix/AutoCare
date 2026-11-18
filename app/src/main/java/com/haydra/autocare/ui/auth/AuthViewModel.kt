@@ -35,7 +35,17 @@ data class RegisterUiState(
     val correoError: String? = null,
     val passwordError: String? = null,
     val confirmacionError: String? = null,
+    val avisoAceptado: Boolean = false,
+    val avisoError: String? = null,
     val isLoading: Boolean = false,
+    val errorMessage: String? = null
+)
+
+@Immutable
+data class DeleteAccountUiState(
+    val password: String = "",
+    val passwordError: String? = null,
+    val isDeleting: Boolean = false,
     val errorMessage: String? = null
 )
 
@@ -100,6 +110,9 @@ class AuthViewModel(
 
     private val _forgotPasswordState = MutableStateFlow(ForgotPasswordUiState())
     val forgotPasswordState: StateFlow<ForgotPasswordUiState> = _forgotPasswordState.asStateFlow()
+
+    private val _deleteAccountState = MutableStateFlow(DeleteAccountUiState())
+    val deleteAccountState: StateFlow<DeleteAccountUiState> = _deleteAccountState.asStateFlow()
 
     private val _currentUser = MutableStateFlow<User?>(authRepository.currentUser())
     val currentUser: StateFlow<User?> = _currentUser.asStateFlow()
@@ -167,19 +180,25 @@ class AuthViewModel(
         _registerState.update { it.copy(confirmacion = confirmacion, confirmacionError = null, errorMessage = null) }
     }
 
+    fun onRegisterAvisoChange(aceptado: Boolean) {
+        _registerState.update { it.copy(avisoAceptado = aceptado, avisoError = null, errorMessage = null) }
+    }
+
     fun register() {
         val estado = _registerState.value
         val nombreError = AuthValidator.validateNombre(estado.nombre)
         val correoError = AuthValidator.validateCorreo(estado.correo)
         val passwordError = AuthValidator.validatePassword(estado.password)
         val confirmacionError = AuthValidator.validateConfirmacion(estado.password, estado.confirmacion)
-        if (nombreError != null || correoError != null || passwordError != null || confirmacionError != null) {
+        val avisoError = AuthValidator.validateAviso(estado.avisoAceptado)
+        if (listOf(nombreError, correoError, passwordError, confirmacionError, avisoError).any { it != null }) {
             _registerState.update {
                 it.copy(
                     nombreError = nombreError,
                     correoError = correoError,
                     passwordError = passwordError,
-                    confirmacionError = confirmacionError
+                    confirmacionError = confirmacionError,
+                    avisoError = avisoError
                 )
             }
             return
@@ -272,6 +291,35 @@ class AuthViewModel(
             authRepository.changePassword(usuario.id, estado.actual, estado.nueva)
                 .onSuccess { _changePasswordState.value = ChangePasswordUiState(successMessage = "Contraseña actualizada") }
                 .onFailure { error -> _changePasswordState.update { it.copy(isSaving = false, errorMessage = error.message) } }
+        }
+    }
+
+    fun onDeleteAccountPasswordChange(value: String) {
+        _deleteAccountState.update { it.copy(password = value, passwordError = null, errorMessage = null) }
+    }
+
+    /** Revisa que haya escrito su contraseña; la pantalla pide confirmar solo si devuelve true. */
+    fun canDeleteAccount(): Boolean {
+        val error = AuthValidator.validatePassword(_deleteAccountState.value.password)
+        _deleteAccountState.update { it.copy(passwordError = error) }
+        return error == null
+    }
+
+    /** Borra la cuenta y todos sus datos; al terminar la sesión queda cerrada. */
+    fun deleteAccount() {
+        val usuario = _currentUser.value ?: return
+        if (!canDeleteAccount()) return
+        _deleteAccountState.update { it.copy(isDeleting = true, errorMessage = null) }
+        viewModelScope.launch {
+            authRepository.deleteAccount(usuario.id, _deleteAccountState.value.password)
+                .onSuccess {
+                    sessionStore?.clearSession()
+                    _deleteAccountState.value = DeleteAccountUiState()
+                    _profileState.value = ProfileUiState()
+                    _changePasswordState.value = ChangePasswordUiState()
+                    _currentUser.value = null
+                }
+                .onFailure { error -> _deleteAccountState.update { it.copy(isDeleting = false, errorMessage = error.message) } }
         }
     }
 

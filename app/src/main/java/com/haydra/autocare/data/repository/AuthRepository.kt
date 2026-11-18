@@ -16,6 +16,13 @@ interface AuthRepository {
     suspend fun changePassword(userId: String, currentPassword: String, newPassword: String): Result<Unit>
     /** Envía al correo un enlace para elegir una contraseña nueva. */
     suspend fun sendPasswordReset(correo: String): Result<Unit>
+    /** Revisa la contraseña de la sesión abierta antes de una acción que no se puede deshacer. */
+    suspend fun confirmPassword(password: String): Result<Unit>
+    /**
+     * Borra la cuenta, su perfil y sus datos del teléfono. En la app, el decorador
+     * AuthRepositoryConNube borra antes los vehículos y registros guardados en la nube.
+     */
+    suspend fun deleteAccount(userId: String, password: String): Result<Unit>
     fun logout()
     fun currentUser(): User?
 }

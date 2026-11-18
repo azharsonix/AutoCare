@@ -29,6 +29,10 @@ object AuthValidator {
         else -> null
     }
 
+    /** La ley pide el consentimiento antes de tratar los datos: sin aceptar el aviso no se crea la cuenta. */
+    fun validateAviso(aceptado: Boolean): String? =
+        if (aceptado) null else "Acepta el aviso de privacidad para crear tu cuenta"
+
     fun validateConfirmacion(password: String, confirmacion: String): String? = when {
         confirmacion.isBlank() -> "Confirma tu contraseña"
         confirmacion != password -> "Las contraseñas no coinciden"
