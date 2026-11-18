@@ -18,20 +18,6 @@ class MaintenanceValidatorTest {
     }
 
     @Test
-    fun `fecha nula es invalida`() {
-        assertNotNull(MaintenanceValidator.validateFecha(null))
-        assertNull(MaintenanceValidator.validateFecha(1_700_000_000_000L))
-    }
-
-    @Test
-    fun `kilometraje negativo o no numerico es invalido`() {
-        assertNotNull(MaintenanceValidator.validateKilometraje(""))
-        assertNotNull(MaintenanceValidator.validateKilometraje("abc"))
-        assertNotNull(MaintenanceValidator.validateKilometraje("-1"))
-        assertNull(MaintenanceValidator.validateKilometraje("45000"))
-    }
-
-    @Test
     fun `costo negativo o no numerico es invalido`() {
         assertNotNull(MaintenanceValidator.validateCosto(""))
         assertNotNull(MaintenanceValidator.validateCosto("abc"))

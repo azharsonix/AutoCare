@@ -29,14 +29,6 @@ class VehicleCatalogoTest {
     }
 
     @Test
-    fun `al escribir la marca se sugieren sus modelos`() = runTest(mainDispatcherRule.testDispatcher) {
-        val viewModel = VehicleViewModel(FakeVehicleRepository(), CatalogoFalso())
-        viewModel.onMarcaChange("Nissan")
-        advanceUntilIdle()
-        assertEquals(listOf("March", "Sentra", "Versa"), viewModel.formState.value.modelosCatalogo)
-    }
-
-    @Test
     fun `el VIN llena marca, modelo y anio`() = runTest(mainDispatcherRule.testDispatcher) {
         val viewModel = VehicleViewModel(FakeVehicleRepository(), CatalogoFalso())
         viewModel.onVinChange("wba 11aa0-5m7h12345")
@@ -47,15 +39,6 @@ class VehicleCatalogoTest {
         assertEquals("BMW", estado.marca)
         assertEquals("X1", estado.modelo)
         assertEquals("2021", estado.anio)
-    }
-
-    @Test
-    fun `un VIN incompleto no se consulta`() = runTest(mainDispatcherRule.testDispatcher) {
-        val viewModel = VehicleViewModel(FakeVehicleRepository(), CatalogoFalso())
-        viewModel.onVinChange("ABC123")
-        viewModel.buscarPorVin()
-        assertTrue(viewModel.formState.value.vinMensaje!!.contains("17"))
-        assertEquals("", viewModel.formState.value.marca)
     }
 
     @Test

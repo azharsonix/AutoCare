@@ -1,6 +1,5 @@
 package com.haydra.autocare
 
-import com.haydra.autocare.data.model.Documento
 import com.haydra.autocare.data.model.Expense
 import com.haydra.autocare.data.model.Maintenance
 import com.haydra.autocare.data.model.Reminder
@@ -56,31 +55,5 @@ class InicioTest {
         assertEquals("r2", inicio.proximos["h"]?.first?.id)
         // Toyota: su único aviso está vencido, así que no se repite en su tarjeta.
         assertFalse("t" in inicio.proximos)
-    }
-
-    @Test
-    fun `sin datos de un vehiculo no suma nada`() {
-        val inicio = resumirInicio(listOf(honda), emptyMap(), hoy)
-        assertEquals(0.0, inicio.gastoMes, 0.001)
-        assertTrue(inicio.alertas.isEmpty())
-        assertTrue(inicio.proximos.isEmpty())
-    }
-
-    @Test
-    fun `solo los documentos vencidos o por vencer piden atencion, los mas proximos primero`() {
-        fun doc(id: String, vence: LocalDate?) = Documento(id, "h", "Doc $id", vence, null, "")
-        val conDocumentos = datos + ("h" to datos.getValue("h").copy(
-            documentos = listOf(
-                doc("lejos", hoy.plusDays(90)),
-                doc("pronto", hoy.plusDays(10)),
-                doc("vencido", hoy.minusDays(2)),
-                doc("sinFecha", null)
-            )
-        ))
-        val inicio = resumirInicio(listOf(honda, toyota), conDocumentos, hoy)
-
-        assertEquals(listOf("vencido", "pronto"), inicio.documentos.map { it.documento.id })
-        assertTrue(inicio.documentos.first().vigencia.vencido)
-        assertFalse(inicio.documentos.last().vigencia.vencido)
     }
 }

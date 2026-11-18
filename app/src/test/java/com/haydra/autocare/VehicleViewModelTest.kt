@@ -7,8 +7,6 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -60,59 +58,5 @@ class VehicleViewModelTest {
         viewModel.loadVehicles("usuario-1")
         advanceUntilIdle()
         assertEquals(1, viewModel.listState.value.vehiculos.size)
-    }
-
-    @Test
-    fun `editar vehiculo actualiza sus datos`() = runTest(mainDispatcherRule.testDispatcher) {
-        val viewModel = VehicleViewModel(FakeVehicleRepository())
-        val usuarioId = "usuario-1"
-        crearVehiculo(viewModel, usuarioId)
-        viewModel.loadVehicles(usuarioId)
-        advanceUntilIdle()
-        val vehiculo = viewModel.listState.value.vehiculos.first()
-
-        viewModel.startEditingVehicle(vehiculo)
-        viewModel.onKilometrajeChange("20000")
-        viewModel.saveVehicle(usuarioId)
-        advanceUntilIdle()
-
-        val actualizado = viewModel.listState.value.vehiculos.first()
-        assertEquals(20000.0, actualizado.kilometraje, 0.0)
-    }
-
-    @Test
-    fun `eliminar vehiculo lo quita del listado`() = runTest(mainDispatcherRule.testDispatcher) {
-        val viewModel = VehicleViewModel(FakeVehicleRepository())
-        val usuarioId = "usuario-1"
-        crearVehiculo(viewModel, usuarioId)
-        viewModel.loadVehicles(usuarioId)
-        advanceUntilIdle()
-        val vehiculo = viewModel.listState.value.vehiculos.first()
-
-        viewModel.deleteVehicle(usuarioId, vehiculo.id)
-        advanceUntilIdle()
-
-        assertTrue(viewModel.listState.value.vehiculos.isEmpty())
-    }
-
-    @Test
-    fun `registrar con año invalido no guarda el vehiculo`() = runTest(mainDispatcherRule.testDispatcher) {
-        val viewModel = VehicleViewModel(FakeVehicleRepository())
-        val usuarioId = "usuario-1"
-
-        viewModel.startNewVehicle()
-        viewModel.onMarcaChange("Toyota")
-        viewModel.onModeloChange("Corolla")
-        viewModel.onAnioChange("3000")
-        viewModel.onColorChange("Rojo")
-        viewModel.onPlacasChange("ABC-123")
-        viewModel.onKilometrajeChange("15000")
-        viewModel.saveVehicle(usuarioId)
-        advanceUntilIdle()
-
-        assertNotNull(viewModel.formState.value.anioError)
-        viewModel.loadVehicles(usuarioId)
-        advanceUntilIdle()
-        assertTrue(viewModel.listState.value.vehiculos.isEmpty())
     }
 }

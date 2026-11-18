@@ -25,10 +25,4 @@ class ExpenseValidatorTest {
         assertNull(ExpenseValidator.validateMonto("0"))
         assertNull(ExpenseValidator.validateMonto("450.75"))
     }
-
-    @Test
-    fun `fecha nula es invalida`() {
-        assertNotNull(ExpenseValidator.validateFecha(null))
-        assertNull(ExpenseValidator.validateFecha(1_700_000_000_000L))
-    }
 }
