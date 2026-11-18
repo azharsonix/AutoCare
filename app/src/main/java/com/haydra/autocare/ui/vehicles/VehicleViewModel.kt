@@ -3,12 +3,16 @@ package com.haydra.autocare.ui.vehicles
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.haydra.autocare.data.catalogo.CatalogoVehiculos
 import com.haydra.autocare.data.model.Vehicle
 import com.haydra.autocare.data.repository.FakeVehicleRepository
 import com.haydra.autocare.data.repository.VehicleRepository
 import com.haydra.autocare.data.validation.VehicleValidator
+import com.haydra.autocare.ui.common.Plantillas
 import com.haydra.autocare.ui.common.formatCantidad
 import java.time.LocalDate
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -41,7 +45,12 @@ data class VehicleFormUiState(
     val errorMessage: String? = null,
     val savedSuccessfully: Boolean = false,
     /** Id del vehículo recién guardado (para abrirlo tras registrarlo). */
-    val guardadoId: String? = null
+    val guardadoId: String? = null,
+    /** Modelos de la marca y año escritos, según el catálogo vPIC (API de terceros). */
+    val modelosCatalogo: List<String> = emptyList(),
+    val vin: String = "",
+    val buscandoVin: Boolean = false,
+    val vinMensaje: String? = null
 )
 
 /**
@@ -50,8 +59,11 @@ data class VehicleFormUiState(
  * [com.haydra.autocare.ui.auth.AuthViewModel].
  */
 class VehicleViewModel(
-    private val vehicleRepository: VehicleRepository = FakeVehicleRepository()
+    private val vehicleRepository: VehicleRepository = FakeVehicleRepository(),
+    private val catalogo: CatalogoVehiculos? = null
 ) : ViewModel() {
+
+    private var busquedaModelos: Job? = null
 
     private val _listState = MutableStateFlow(VehicleListUiState())
     val listState: StateFlow<VehicleListUiState> = _listState.asStateFlow()
@@ -94,14 +106,82 @@ class VehicleViewModel(
             placas = vehicle.placas,
             kilometraje = formatCantidad(vehicle.kilometraje)
         )
+        buscarModelos()
     }
 
-    fun onMarcaChange(value: String) = _formState.update { it.copy(marca = value, marcaError = null, errorMessage = null) }
+    fun onMarcaChange(value: String) {
+        _formState.update { it.copy(marca = value, marcaError = null, errorMessage = null) }
+        buscarModelos()
+    }
     fun onModeloChange(value: String) = _formState.update { it.copy(modelo = value, modeloError = null, errorMessage = null) }
-    fun onAnioChange(value: String) = _formState.update { it.copy(anio = value, anioError = null, errorMessage = null) }
+    fun onAnioChange(value: String) {
+        _formState.update { it.copy(anio = value, anioError = null, errorMessage = null) }
+        buscarModelos()
+    }
     fun onColorChange(value: String) = _formState.update { it.copy(color = value, colorError = null, errorMessage = null) }
     fun onPlacasChange(value: String) = _formState.update { it.copy(placas = value, placasError = null, errorMessage = null) }
     fun onKilometrajeChange(value: String) = _formState.update { it.copy(kilometraje = value, kilometrajeError = null, errorMessage = null) }
+
+    fun onVinChange(value: String) = _formState.update {
+        it.copy(vin = value.filter(Char::isLetterOrDigit).uppercase().take(VIN_LARGO), vinMensaje = null)
+    }
+
+    /**
+     * Pide al catálogo vPIC la marca, el modelo y el año del número de serie y llena el formulario.
+     * Si no hay conexión o el VIN no existe, solo muestra un aviso: el registro manual sigue igual.
+     */
+    fun buscarPorVin() {
+        val catalogo = catalogo ?: return
+        val vin = _formState.value.vin
+        if (vin.length != VIN_LARGO) {
+            _formState.update { it.copy(vinMensaje = "El número de serie tiene $VIN_LARGO caracteres") }
+            return
+        }
+        _formState.update { it.copy(buscandoVin = true, vinMensaje = null) }
+        viewModelScope.launch {
+            catalogo.decodificarVin(vin)
+                .onSuccess { datos ->
+                    _formState.update {
+                        it.copy(
+                            marca = marcaConocida(datos.marca.ifEmpty { it.marca }),
+                            modelo = datos.modelo.ifEmpty { it.modelo },
+                            anio = datos.anio?.toString() ?: it.anio,
+                            marcaError = null, modeloError = null, anioError = null,
+                            buscandoVin = false,
+                            vinMensaje = "Datos llenados con el número de serie. Revísalos antes de guardar."
+                        )
+                    }
+                    buscarModelos()
+                }
+                .onFailure { error ->
+                    val mensaje = error.message?.takeIf { "número de serie" in it }
+                        ?: "No pudimos consultar el catálogo. Revisa tu conexión."
+                    _formState.update { it.copy(buscandoVin = false, vinMensaje = mensaje) }
+                }
+        }
+    }
+
+    /** Espera a que el usuario deje de escribir y trae los modelos de esa marca y año. */
+    private fun buscarModelos() {
+        val catalogo = catalogo ?: return
+        busquedaModelos?.cancel()
+        val estado = _formState.value
+        val marca = estado.marca.trim()
+        if (marca.length < 2) {
+            _formState.update { it.copy(modelosCatalogo = emptyList()) }
+            return
+        }
+        busquedaModelos = viewModelScope.launch {
+            delay(ESPERA_ESCRITURA_MS)
+            val modelos = catalogo.modelos(marca, estado.anio.toIntOrNull()?.takeIf { it in 1950..2100 })
+                .getOrDefault(emptyList())
+            _formState.update { if (it.marca.trim() == marca) it.copy(modelosCatalogo = modelos) else it }
+        }
+    }
+
+    /** Usa la escritura de la lista de marcas de la app ("BMW" en vez de "Bmw"). */
+    private fun marcaConocida(marca: String) =
+        (Plantillas.marcasVehiculo + MARCAS_CON_SIGLAS).firstOrNull { it.equals(marca, ignoreCase = true) } ?: marca
 
     fun saveVehicle(usuarioId: String) {
         val estado = _formState.value
@@ -198,5 +278,13 @@ class VehicleViewModel(
         viewModelScope.launch {
             vehicleRepository.deleteVehicle(id).onSuccess { loadVehicles(usuarioId) }
         }
+    }
+
+    private companion object {
+        const val VIN_LARGO = 17
+        const val ESPERA_ESCRITURA_MS = 600L
+
+        /** Marcas que el catálogo escribe en mayúsculas y que no van con mayúscula inicial. */
+        val MARCAS_CON_SIGLAS = listOf("BMW", "GMC", "MG", "BYD", "SEAT", "MINI", "RAM", "JAC", "Mercedes-Benz")
     }
 }

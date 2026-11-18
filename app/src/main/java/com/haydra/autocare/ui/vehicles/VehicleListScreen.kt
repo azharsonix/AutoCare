@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -58,8 +60,10 @@ import com.haydra.autocare.ui.common.formatKm
 import com.haydra.autocare.ui.common.formatMes
 import com.haydra.autocare.ui.common.formatMoneda
 import com.haydra.autocare.ui.components.AccountMenuButton
-import com.haydra.autocare.ui.components.CargandoContenido
 import com.haydra.autocare.ui.components.EmptyState
+import com.haydra.autocare.ui.components.Esqueleto
+import com.haydra.autocare.ui.components.Hueso
+import com.haydra.autocare.ui.components.InicioEsqueleto
 import com.haydra.autocare.ui.components.TituloSeccion
 import java.time.LocalDate
 import java.time.LocalTime
@@ -140,7 +144,7 @@ fun VehicleListScreen(
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
             when {
-                state.isLoading && vehiculos.isEmpty() -> CargandoContenido()
+                state.isLoading && vehiculos.isEmpty() -> InicioEsqueleto()
                 vehiculos.isEmpty() -> EmptyState(
                     icon = Icons.Filled.DirectionsCar,
                     message = "Registra tu vehículo para llevar sus servicios, gastos y avisos.",
@@ -240,11 +244,18 @@ private fun ResumenMes(gastoMes: Double, vehiculos: Int, cargado: Boolean) {
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Text(
-                    text = if (cargado) formatMoneda(gastoMes) else "—",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                if (cargado) {
+                    Text(
+                        text = formatMoneda(gastoMes),
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                } else {
+                    // Mismo alto que la cifra: al llegar el total la tarjeta no cambia de tamaño.
+                    Esqueleto(modifier = Modifier.padding(vertical = 4.dp)) {
+                        Hueso(modifier = Modifier.width(120.dp).height(24.dp), forma = MaterialTheme.shapes.extraSmall)
+                    }
+                }
                 Text(
                     text = if (vehiculos == 1) "en tu vehículo" else "entre tus $vehiculos vehículos",
                     style = MaterialTheme.typography.bodyMedium,

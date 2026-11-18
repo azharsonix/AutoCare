@@ -18,7 +18,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -34,7 +37,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.haydra.autocare.R
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 /** Proporción de las capas intro_*.png (todas comparten el mismo lienzo). */
 private const val PROPORCION_LOGO = 900f / 504f
@@ -49,41 +54,50 @@ private val CENTROS_LETRAS = listOf(
 
 private val SalidaRapida = CubicBezierEasing(0.16f, 1f, 0.3f, 1f)
 
+/** Tiempo máximo que el logotipo espera a la app antes de abrirse de todos modos. */
+private const val ESPERA_MAXIMA_MS = 1500L
+
 /**
- * Animación de arranque con el logotipo: el coche entra con estela desde la
- * izquierda, las letras de "Care" saltan una tras otra, la barra de la "a" cae
- * con rebote, las franjas se dibujan de izquierda a derecha y todo se abre
- * hacia la app. Continúa la pantalla de inicio del sistema (mismo fondo), así
+ * Animación de arranque con el logotipo. Tiene un propósito: cubrir el tiempo
+ * en que se abre la base de datos y se revisa la sesión, para que la primera
+ * pantalla aparezca ya lista y no en blanco o a medio cargar.
+ *
+ * El coche entra con estela, las letras de "Care" saltan una tras otra, la
+ * barra de la "a" cae y las franjas se dibujan (menos de un segundo). En
+ * cuanto [appLista] es verdadero el logotipo se abre hacia la app; no hay
+ * pausa fija. Continúa la pantalla de inicio del sistema (mismo fondo), así
  * que no hay salto. Un toque la salta.
  *
- * [onLogoCompleto] avisa cuando termina el movimiento y el logotipo se queda
- * quieto: es el momento de componer la app debajo sin que la animación se trabe.
+ * [onLogoCompleto] avisa cuando termina el movimiento: es el momento de
+ * componer la app debajo sin que la animación se trabe.
  */
 @Composable
-fun IntroAnimada(onLogoCompleto: () -> Unit, onTerminar: () -> Unit) {
+fun IntroAnimada(appLista: Boolean, onLogoCompleto: () -> Unit, onTerminar: () -> Unit) {
     val coche = remember { Animatable(0f) }
     val letras = remember { List(CENTROS_LETRAS.size) { Animatable(0f) } }
     val barra = remember { Animatable(0f) }
     val franjas = remember { Animatable(0f) }
     val salida = remember { Animatable(0f) }
     val tinte = ColorFilter.tint(colorResource(R.color.logo_inicio))
+    val lista by rememberUpdatedState(appLista)
 
     LaunchedEffect(Unit) {
-        launch { coche.animateTo(1f, tween(700, easing = SalidaRapida)) }
-        delay(350)
+        launch { coche.animateTo(1f, tween(550, easing = SalidaRapida)) }
+        delay(200)
         letras.forEachIndexed { i, letra ->
             launch {
-                delay(i * 90L)
-                letra.animateTo(1f, spring(dampingRatio = 0.45f, stiffness = 380f))
+                delay(i * 60L)
+                letra.animateTo(1f, spring(dampingRatio = 0.5f, stiffness = 600f))
             }
         }
-        delay(letras.size * 90L + 120)
-        launch { barra.animateTo(1f, spring(dampingRatio = 0.4f, stiffness = 500f)) }
-        franjas.animateTo(1f, tween(500, easing = FastOutSlowInEasing))
+        delay(letras.size * 60L + 60)
+        launch { barra.animateTo(1f, spring(dampingRatio = 0.45f, stiffness = 700f)) }
+        franjas.animateTo(1f, tween(350, easing = FastOutSlowInEasing))
         onLogoCompleto()
-        // El logotipo completo se queda quieto lo suficiente para leerlo.
-        delay(1200)
-        salida.animateTo(1f, tween(400, easing = FastOutLinearInEasing))
+        // Se abre en cuanto la sesión y los datos están listos; si algo tarda de
+        // más, no deja a la persona mirando el logotipo.
+        withTimeoutOrNull(ESPERA_MAXIMA_MS) { snapshotFlow { lista }.first { it } }
+        salida.animateTo(1f, tween(320, easing = FastOutLinearInEasing))
         onTerminar()
     }
 

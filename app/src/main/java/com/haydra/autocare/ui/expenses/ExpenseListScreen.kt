@@ -18,10 +18,10 @@ import com.haydra.autocare.data.model.Expense
 import com.haydra.autocare.ui.common.formatCantidad
 import com.haydra.autocare.ui.common.formatDia
 import com.haydra.autocare.ui.common.formatMoneda
-import com.haydra.autocare.ui.components.CargandoContenido
 import com.haydra.autocare.ui.components.DeslizarParaBorrar
 import com.haydra.autocare.ui.components.EmptyState
 import com.haydra.autocare.ui.components.ListaEncabezado
+import com.haydra.autocare.ui.components.ListaEsqueleto
 import com.haydra.autocare.ui.components.RegistroItem
 import com.haydra.autocare.ui.components.agruparPorMes
 import com.haydra.autocare.ui.components.seccionesPorMes
@@ -51,7 +51,7 @@ fun ExpenseTabContent(
     Box(modifier = modifier.fillMaxSize()) {
         when {
             state.isLoading && gastos.isEmpty() ->
-                CargandoContenido()
+                ListaEsqueleto()
             gastos.isEmpty() -> EmptyState(
                 icon = Icons.Filled.Payments,
                 message = "Aún no hay gastos.\nToca + para registrar el primero.",
