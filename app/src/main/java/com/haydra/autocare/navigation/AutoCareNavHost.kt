@@ -131,7 +131,8 @@ fun AutoCareNavHost(
     navController: NavHostController = rememberNavController(),
     vehiculoAAbrir: String? = null,
     pestanaAAbrir: String? = null,
-    onVehiculoAbierto: () -> Unit = {}
+    onVehiculoAbierto: () -> Unit = {},
+    onSesionRevisada: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val container = remember { (context.applicationContext as AutoCareApplication).container }
@@ -167,6 +168,9 @@ fun AutoCareNavHost(
     // El plan sigue a la cuenta con sesión; el límite de vehículos depende de él.
     LaunchedEffect(currentUser?.id) { planViewModel.observar(currentUser?.id) }
     SideEffect { vehicleViewModel.limiteVehiculos = if (plan.esPro) null else Limites.VEHICULOS_GRATIS }
+
+    // La intro del logotipo espera esta señal para abrirse hacia la app.
+    LaunchedEffect(sessionChecked) { if (sessionChecked) onSesionRevisada() }
 
     if (!sessionChecked) {
         CargandoContenido()
@@ -239,9 +243,9 @@ fun AutoCareNavHost(
         if (guardado == null) return
         reminderViewModel.completarPorTitulo(vehicleId, guardado.tipo) { hechos ->
             val texto = if (hechos > 0) {
-                "${guardado.tipo} registrado · su aviso quedó como hecho"
+                "Se registró ${guardado.tipo} · su aviso quedó como hecho"
             } else {
-                "${guardado.tipo} registrado"
+                "Se registró ${guardado.tipo}"
             }
             val intervalo = Plantillas.intervaloDe(guardado.tipo)
             if (intervalo == null) {
@@ -628,8 +632,8 @@ fun AutoCareNavHost(
                     mensajes.mostrar(
                         when {
                             guardado == null -> "Documento guardado"
-                            guardado.vence != null -> "${guardado.tipo} guardado. Te avisaremos antes de que venza"
-                            else -> "${guardado.tipo} guardado"
+                            guardado.vence != null -> "Se guardó ${guardado.tipo}. Te avisaremos antes de que venza"
+                            else -> "Se guardó ${guardado.tipo}"
                         }
                     )
                     navController.popBackStack()

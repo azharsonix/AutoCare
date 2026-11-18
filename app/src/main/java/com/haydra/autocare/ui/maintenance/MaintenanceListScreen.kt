@@ -17,10 +17,10 @@ import com.haydra.autocare.data.model.Maintenance
 import com.haydra.autocare.ui.common.formatDia
 import com.haydra.autocare.ui.common.formatKm
 import com.haydra.autocare.ui.common.formatMoneda
-import com.haydra.autocare.ui.components.CargandoContenido
 import com.haydra.autocare.ui.components.DeslizarParaBorrar
 import com.haydra.autocare.ui.components.EmptyState
 import com.haydra.autocare.ui.components.ListaEncabezado
+import com.haydra.autocare.ui.components.ListaEsqueleto
 import com.haydra.autocare.ui.components.RegistroItem
 import com.haydra.autocare.ui.components.agruparPorMes
 import com.haydra.autocare.ui.components.seccionesPorMes
@@ -50,7 +50,7 @@ fun MaintenanceTabContent(
     Box(modifier = modifier.fillMaxSize()) {
         when {
             state.isLoading && mantenimientos.isEmpty() ->
-                CargandoContenido()
+                ListaEsqueleto()
             mantenimientos.isEmpty() -> EmptyState(
                 icon = Icons.Filled.Build,
                 message = "Aún no hay mantenimientos.\nToca + para registrar el primero.",

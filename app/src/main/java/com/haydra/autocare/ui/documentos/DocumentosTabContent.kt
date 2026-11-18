@@ -31,10 +31,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.haydra.autocare.data.model.Documento
-import com.haydra.autocare.ui.components.CargandoContenido
 import com.haydra.autocare.ui.components.DeslizarParaBorrar
 import com.haydra.autocare.ui.components.EmptyState
 import com.haydra.autocare.ui.components.FilaEnGrupo
+import com.haydra.autocare.ui.components.ListaEsqueleto
 import com.haydra.autocare.ui.components.MiniaturaFoto
 import com.haydra.autocare.ui.components.PosicionEnGrupo
 import com.haydra.autocare.ui.components.VisorFoto
@@ -64,7 +64,7 @@ fun DocumentosTabContent(
 
     Box(modifier = modifier.fillMaxSize()) {
         when {
-            state.isLoading && documentos.isEmpty() -> CargandoContenido()
+            state.isLoading && documentos.isEmpty() -> ListaEsqueleto()
             documentos.isEmpty() -> EmptyState(
                 icon = Icons.Filled.Description,
                 message = "Guarda tu póliza, tarjeta de circulación y verificación.\n" +

@@ -1,13 +1,14 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Theme.AutoCare" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="android:statusBarColor">@color/brand_primary</item>
-        <item name="android:windowLightStatusBar">false</item>
-        <!-- Mismo azul que la animación de inicio: sin cuadro negro al arrancar. -->
+        <!-- Iconos oscuros sobre el fondo blanco del arranque; después enableEdgeToEdge
+             ajusta la barra de estado a cada pantalla. -->
+        <item name="android:windowLightStatusBar">true</item>
+        <!-- Mismo blanco que la animación de inicio: sin cuadro negro al arrancar. -->
         <item name="android:windowBackground">@color/fondo_inicio</item>
     </style>
 
-    <!-- Pantalla de inicio del sistema: solo el fondo azul; el logotipo lo
+    <!-- Pantalla de inicio del sistema: solo el fondo blanco; el logotipo lo
          anima IntroAnimada justo después, sin salto. -->
     <style name="Theme.AutoCare.Inicio" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/fondo_inicio</item>
