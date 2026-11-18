@@ -11,8 +11,9 @@ App Android para llevar el control del mantenimiento, los gastos, los recordator
 | Arquitectura | MVVM + Repository, inyección manual (`AppContainer`) |
 | Datos locales | Room 2.8.4 (KSP), DataStore |
 | Nube | Firebase Authentication y Cloud Firestore (BoM 35.0.0) |
+| API de terceros | vPIC de la NHTSA (catálogo de marcas, modelos y lectura del VIN) |
 | Tareas en segundo plano | WorkManager |
-| Pruebas | JUnit 4, kotlinx-coroutines-test, Compose UI Test |
+| Pruebas | JUnit 4, kotlinx-coroutines-test, org.json, Compose UI Test |
 
 ## Requisitos
 
@@ -31,7 +32,21 @@ App Android para llevar el control del mantenimiento, los gastos, los recordator
 ## Firebase
 
 - **Authentication:** proveedor de correo y contraseña. Las cuentas locales anteriores se migran solas al iniciar sesión.
-- **Cloud Firestore:** perfil del usuario en `usuarios/{uid}`. Las reglas están en [`firestore.rules`](firestore.rules).
+- **Cloud Firestore:** perfil del usuario en `usuarios/{uid}` y, dentro, las colecciones `vehiculos`, `mantenimientos`, `gastos`, `recordatorios` y `documentos`. Las reglas están en [`firestore.rules`](firestore.rules).
+- **Sincronización:** cada cambio se guarda en Room y se sube a Firestore. Sin conexión queda en la caché de Firestore y se sube al volver la señal. Al iniciar sesión se descargan los datos de la cuenta. Las fotos de comprobantes se quedan en el teléfono.
+
+## API de terceros
+
+[vPIC](https://vpic.nhtsa.dot.gov/api/) de la NHTSA, pública y sin clave. En el registro de vehículos llena marca, modelo y año a partir del número de serie (VIN) y sugiere los modelos de la marca y el año escritos. Código en `data/catalogo/`.
+
+## Seguridad
+
+- Contraseñas validadas por Firebase Authentication; las cuentas locales anteriores usan PBKDF2.
+- Reglas de Firestore: cada usuario solo lee y escribe bajo su propio `uid`.
+- Sin respaldo automático de Android (`allowBackup="false"` y reglas de extracción que excluyen todo).
+- Solo tráfico HTTPS (`usesCleartextTraffic="false"`).
+- Reportes PDF compartidos con `FileProvider`.
+- R8 en la variante release.
 
 ## Ramas y versiones
 

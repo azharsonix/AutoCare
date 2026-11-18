@@ -51,8 +51,8 @@ import com.haydra.autocare.ui.common.Mensajes
 import com.haydra.autocare.ui.common.MostrarMensajes
 import com.haydra.autocare.ui.components.AutoCareTopBar
 import com.haydra.autocare.ui.components.BotonExportarPdf
-import com.haydra.autocare.ui.components.CargandoContenido
 import com.haydra.autocare.ui.components.EliminarAccion
+import com.haydra.autocare.ui.components.ResumenEsqueleto
 import com.haydra.autocare.ui.documentos.DocumentoViewModel
 import com.haydra.autocare.ui.documentos.DocumentosTabContent
 import com.haydra.autocare.ui.expenses.ExpenseTabContent
@@ -219,7 +219,7 @@ fun VehicleWorkspaceScreen(
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
             if (actual == null) {
-                CargandoContenido()
+                ResumenEsqueleto()
             } else {
                 AnimatedContent(
                     targetState = selectedTab,

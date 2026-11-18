@@ -22,3 +22,14 @@ local.properties
 .kotlin/
 /.idea/deploymentTargetSelector.xml
 /.idea/deviceManager.xml
+
+# Llaves de firma (nunca se suben)
+*.jks
+*.keystore
+
+# Documentos de la materia (se entregan aparte, no van en el repositorio)
+*.docx
+*.doc
+*.pptx
+*.pdf
+~$*

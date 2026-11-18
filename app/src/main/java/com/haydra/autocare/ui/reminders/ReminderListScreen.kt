@@ -25,11 +25,11 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.haydra.autocare.data.model.Reminder
-import com.haydra.autocare.ui.components.CargandoContenido
 import com.haydra.autocare.ui.components.DeslizarParaBorrar
 import com.haydra.autocare.ui.components.EmptyState
 import com.haydra.autocare.ui.components.EncabezadoGrupo
 import com.haydra.autocare.ui.components.FilaEnGrupo
+import com.haydra.autocare.ui.components.ListaEsqueleto
 import com.haydra.autocare.ui.components.PosicionEnGrupo
 import com.haydra.autocare.ui.vehicles.EstadoRecordatorio
 import com.haydra.autocare.ui.vehicles.estadoRecordatorio
@@ -69,7 +69,7 @@ fun ReminderTabContent(
     Box(modifier = modifier.fillMaxSize()) {
         when {
             state.isLoading && conEstado.isEmpty() ->
-                CargandoContenido()
+                ListaEsqueleto()
             conEstado.isEmpty() -> EmptyState(
                 icon = Icons.Filled.Notifications,
                 message = "Sin recordatorios.\nCrea uno por fecha o por kilometraje y te avisamos.",

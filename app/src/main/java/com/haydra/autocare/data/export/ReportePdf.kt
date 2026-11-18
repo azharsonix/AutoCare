@@ -282,10 +282,10 @@ private const val LADO_FOTO_PDF = 1000
 
 private val AZUL = Color.rgb(0x1F, 0x5F, 0xAE)
 private val GRAFITO = Color.rgb(0x2B, 0x2D, 0x42)
-private val TEXTO = Color.rgb(0x1C, 0x1B, 0x1B)
-private val GRIS = Color.rgb(0x6B, 0x66, 0x60)
-private val FONDO_SUAVE = Color.rgb(0xF4, 0xF2, 0xF0)
-private val LINEA = Color.rgb(0xDD, 0xD8, 0xD2)
+private val TEXTO = Color.rgb(0x19, 0x1C, 0x20)
+private val GRIS = Color.rgb(0x5D, 0x61, 0x69)
+private val FONDO_SUAVE = Color.rgb(0xF3, 0xF3, 0xFA)
+private val LINEA = Color.rgb(0xD9, 0xDC, 0xE4)
 
 private object Estilos {
     fun texto(tamano: Float, color: Int = TEXTO, negrita: Boolean = false) = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {

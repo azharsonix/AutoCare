@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- En modo oscuro no se deslumbra con blanco: fondo oscuro y logotipo azul claro. -->
-    <color name="fondo_inicio">#FF191818</color>
+    <color name="fondo_inicio">#FF111318</color>
     <color name="logo_inicio">#FFA9C7FF</color>
 </resources>

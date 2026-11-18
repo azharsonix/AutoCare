@@ -39,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -209,7 +210,8 @@ private fun VehicleHeroCard(vehiculo: Vehicle, onActualizarKm: () -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Brush.linearGradient(listOf(colores.primary, colores.tertiary)))
+                // Azul de marca a uno más profundo del mismo tono: con el grafito el degradado se veía turbio.
+                .background(Brush.linearGradient(listOf(colores.primary, lerp(colores.primary, colores.onPrimaryContainer, 0.45f))))
                 .padding(20.dp)
         ) {
             // Marca y modelo ya están en la barra superior: aquí no se repiten.
