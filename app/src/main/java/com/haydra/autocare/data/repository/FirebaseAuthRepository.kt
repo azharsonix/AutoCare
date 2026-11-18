@@ -13,6 +13,7 @@ import com.haydra.autocare.data.local.db.UserDao
 import com.haydra.autocare.data.local.db.UserEntity
 import com.haydra.autocare.data.local.db.toModel
 import com.haydra.autocare.data.model.User
+import com.haydra.autocare.data.privacidad.AvisoPrivacidad
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
@@ -50,7 +51,8 @@ class FirebaseAuthRepository(
         }
         val usuario = auth.createUserWithEmailAndPassword(correoNormalizado, password).await().user
             ?: throw IllegalStateException(MensajesFirebase.GENERICO)
-        vincular(usuario, nombre.trim(), password)
+        // Solo se llega aquí después de aceptar el aviso de privacidad en el formulario de registro.
+        vincular(usuario, nombre.trim(), password, avisoAceptado = true)
     }
 
     override suspend fun login(correo: String, password: String): Result<User> = conFirebase {
@@ -94,9 +96,7 @@ class FirebaseAuthRepository(
 
     override suspend fun changePassword(userId: String, currentPassword: String, newPassword: String): Result<Unit> =
         conFirebase {
-            val usuario = usuarioFirebase()
-            val correo = usuario.email ?: throw IllegalStateException(MensajesFirebase.GENERICO)
-            usuario.reauthenticate(EmailAuthProvider.getCredential(correo, currentPassword)).await()
+            val usuario = reautenticar(currentPassword)
             usuario.updatePassword(newPassword).await()
             userDao.getById(userId)?.let { userDao.update(it.copy(passwordHash = hashear(newPassword))) }
         }
@@ -104,6 +104,25 @@ class FirebaseAuthRepository(
     override suspend fun sendPasswordReset(correo: String): Result<Unit> = conFirebase {
         auth.sendPasswordResetEmail(normalizar(correo)).await()
         Unit
+    }
+
+    override suspend fun confirmPassword(password: String): Result<Unit> = conFirebase {
+        reautenticar(password)
+        Unit
+    }
+
+    /**
+     * Firebase pide un inicio de sesión reciente para borrar una cuenta, por eso se vuelve a
+     * validar la contraseña. El perfil se borra antes que la cuenta porque después las reglas
+     * de Firestore ya no dejarían tocarlo.
+     */
+    override suspend fun deleteAccount(userId: String, password: String): Result<Unit> = conFirebase {
+        val usuario = reautenticar(password)
+        firestore.collection(COLECCION_USUARIOS).document(usuario.uid).delete().await()
+        usuario.delete().await()
+        // Room borra en cascada los vehículos y todos sus registros.
+        userDao.deleteById(userId)
+        sesionActual = null
     }
 
     override fun logout() {
@@ -128,7 +147,12 @@ class FirebaseAuthRepository(
      * Relaciona la cuenta de Firebase con la fila local del usuario (la crea si no existe)
      * y actualiza su perfil en Firestore.
      */
-    private suspend fun vincular(usuario: FirebaseUser, nombre: String?, password: String): User {
+    private suspend fun vincular(
+        usuario: FirebaseUser,
+        nombre: String?,
+        password: String,
+        avisoAceptado: Boolean = false
+    ): User {
         val correo = normalizar(usuario.email ?: throw IllegalStateException(MensajesFirebase.GENERICO))
         val perfil = runCatching {
             firestore.collection(COLECCION_USUARIOS).document(usuario.uid).get().await()
@@ -147,25 +171,39 @@ class FirebaseAuthRepository(
             UserEntity(id = usuario.uid, nombre = nombreFinal, correo = correo, passwordHash = hashear(password))
                 .also { userDao.insert(it) }
         }
-        guardarPerfil(usuario.uid, entidad)
+        guardarPerfil(usuario.uid, entidad, avisoAceptado)
         return entidad.toModel().also { sesionActual = it }
     }
 
-    /** Sin `await`: Firestore guarda el cambio en su caché y lo sube cuando hay conexión. */
-    private fun guardarPerfil(uid: String, entidad: UserEntity) {
-        firestore.collection(COLECCION_USUARIOS).document(uid).set(
-            mapOf(
-                "nombre" to entidad.nombre,
-                "correo" to entidad.correo,
-                "localId" to entidad.id,
-                "actualizado" to FieldValue.serverTimestamp()
-            ),
-            SetOptions.merge()
+    /**
+     * Sin `await`: Firestore guarda el cambio en su caché y lo sube cuando hay conexión.
+     * Con [avisoAceptado] queda constancia de qué versión del aviso de privacidad aceptó y cuándo.
+     */
+    private fun guardarPerfil(uid: String, entidad: UserEntity, avisoAceptado: Boolean = false) {
+        val datos = mutableMapOf<String, Any>(
+            "nombre" to entidad.nombre,
+            "correo" to entidad.correo,
+            "localId" to entidad.id,
+            "actualizado" to FieldValue.serverTimestamp()
         )
+        if (avisoAceptado) {
+            datos["avisoPrivacidad"] = mapOf(
+                "version" to AvisoPrivacidad.VERSION,
+                "aceptado" to FieldValue.serverTimestamp()
+            )
+        }
+        firestore.collection(COLECCION_USUARIOS).document(uid).set(datos, SetOptions.merge())
     }
 
     private fun usuarioFirebase(): FirebaseUser =
         auth.currentUser ?: throw IllegalStateException("Tu sesión expiró, vuelve a iniciar sesión")
+
+    private suspend fun reautenticar(password: String): FirebaseUser {
+        val usuario = usuarioFirebase()
+        val correo = usuario.email ?: throw IllegalStateException(MensajesFirebase.GENERICO)
+        usuario.reauthenticate(EmailAuthProvider.getCredential(correo, password)).await()
+        return usuario
+    }
 
     private fun normalizar(correo: String) = correo.trim().lowercase()
 

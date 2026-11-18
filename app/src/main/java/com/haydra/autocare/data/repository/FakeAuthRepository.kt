@@ -91,6 +91,21 @@ class FakeAuthRepository : AuthRepository {
         return Result.success(Unit)
     }
 
+    override suspend fun confirmPassword(password: String): Result<Unit> {
+        val almacenado = sesionActual?.let { usuariosPorId[it.id] }
+            ?: return Result.failure(IllegalStateException("Tu sesión expiró, vuelve a iniciar sesión"))
+        return if (almacenado.password == password) Result.success(Unit)
+        else Result.failure(IllegalStateException("La contraseña es incorrecta"))
+    }
+
+    override suspend fun deleteAccount(userId: String, password: String): Result<Unit> {
+        delay(300)
+        confirmPassword(password).onFailure { return Result.failure(it) }
+        usuariosPorId.remove(userId)
+        sesionActual = null
+        return Result.success(Unit)
+    }
+
     override fun logout() {
         sesionActual = null
     }
