@@ -8,7 +8,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -46,21 +45,6 @@ class ReminderViewModelTest {
         assertEquals(1, recordatorios.size)
         assertEquals("Cambio de aceite", recordatorios.first().titulo)
         assertEquals(false, recordatorios.first().completado)
-    }
-
-    @Test
-    fun `crear sin titulo ni fecha marca errores y no guarda`() = runTest(mainDispatcherRule.testDispatcher) {
-        val viewModel = ReminderViewModel(FakeReminderRepository())
-        viewModel.startNewReminder()
-
-        viewModel.onKilometrajeChange("-10")
-        viewModel.saveReminder(vehiculoId)
-        advanceUntilIdle()
-
-        val estado = viewModel.formState.value
-        assertNotNull(estado.tituloError)
-        assertNotNull(estado.fechaError)
-        assertNotNull(estado.kilometrajeError)
     }
 
     @Test

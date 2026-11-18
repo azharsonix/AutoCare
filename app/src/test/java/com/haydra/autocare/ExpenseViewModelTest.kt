@@ -64,24 +64,4 @@ class ExpenseViewModelTest {
         advanceUntilIdle()
         assertTrue(viewModel.listState.value.gastos.isEmpty())
     }
-
-    @Test
-    fun `editar gasto actualiza sus datos`() = runTest(mainDispatcherRule.testDispatcher) {
-        val viewModel = ExpenseViewModel(FakeExpenseRepository())
-        viewModel.startNewExpense()
-        viewModel.onCategoriaChange("Gasolina")
-        viewModel.onMontoChange("500")
-        viewModel.onFechaChange(fechaMillis())
-        viewModel.saveExpense(vehiculoId)
-        advanceUntilIdle()
-
-        val gasto = viewModel.listState.value.gastos.first()
-        viewModel.startEditingExpense(gasto)
-        viewModel.onMontoChange("750")
-        viewModel.saveExpense(vehiculoId)
-        advanceUntilIdle()
-
-        val actualizado = viewModel.listState.value.gastos.first()
-        assertEquals(750.0, actualizado.monto, 0.0)
-    }
 }

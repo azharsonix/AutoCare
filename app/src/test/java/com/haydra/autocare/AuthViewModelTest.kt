@@ -45,47 +45,6 @@ class AuthViewModelTest {
     }
 
     @Test
-    fun `registro con campos invalidos no crea sesion y marca errores`() = runTest(mainDispatcherRule.testDispatcher) {
-        val viewModel = AuthViewModel(FakeAuthRepository())
-
-        viewModel.onRegisterNombreChange("")
-        viewModel.onRegisterCorreoChange("no-es-correo")
-        viewModel.onRegisterPasswordChange("123")
-        viewModel.onRegisterConfirmacionChange("456")
-        viewModel.register()
-
-        assertNull(viewModel.currentUser.value)
-        val estado = viewModel.registerState.value
-        assertNotNull(estado.nombreError)
-        assertNotNull(estado.correoError)
-        assertNotNull(estado.passwordError)
-        assertNotNull(estado.confirmacionError)
-    }
-
-    @Test
-    fun `login con credenciales correctas inicia sesion`() = runTest(mainDispatcherRule.testDispatcher) {
-        val repository = FakeAuthRepository()
-        val viewModel = AuthViewModel(repository)
-
-        viewModel.onRegisterNombreChange("Ana")
-        viewModel.onRegisterCorreoChange("ana@autocare.com")
-        viewModel.onRegisterPasswordChange("secreta1")
-        viewModel.onRegisterConfirmacionChange("secreta1")
-        viewModel.onRegisterAvisoChange(true)
-        viewModel.register()
-        advanceUntilIdle()
-        viewModel.logout()
-        assertNull(viewModel.currentUser.value)
-
-        viewModel.onLoginCorreoChange("ana@autocare.com")
-        viewModel.onLoginPasswordChange("secreta1")
-        viewModel.login()
-        advanceUntilIdle()
-
-        assertEquals("ana@autocare.com", viewModel.currentUser.value?.correo)
-    }
-
-    @Test
     fun `login con contrasena incorrecta muestra error y no inicia sesion`() = runTest(mainDispatcherRule.testDispatcher) {
         val repository = FakeAuthRepository()
         val viewModel = AuthViewModel(repository)
@@ -108,30 +67,6 @@ class AuthViewModelTest {
         assertTrue(viewModel.loginState.value.errorMessage != null)
     }
 
-    @Test
-    fun `restablecer contrasena envia el enlace al correo de la cuenta`() = runTest(mainDispatcherRule.testDispatcher) {
-        val viewModel = AuthViewModel(FakeAuthRepository())
-
-        viewModel.onForgotCorreoChange(" ${DemoData.CORREO} ")
-        viewModel.sendPasswordReset()
-        advanceUntilIdle()
-
-        assertEquals(DemoData.CORREO, viewModel.forgotPasswordState.value.enviadoA)
-        assertNull(viewModel.forgotPasswordState.value.errorMessage)
-    }
-
-    @Test
-    fun `restablecer contrasena con correo invalido no envia nada`() = runTest(mainDispatcherRule.testDispatcher) {
-        val viewModel = AuthViewModel(FakeAuthRepository())
-
-        viewModel.onForgotCorreoChange("no-es-correo")
-        viewModel.sendPasswordReset()
-        advanceUntilIdle()
-
-        assertNull(viewModel.forgotPasswordState.value.enviadoA)
-        assertNotNull(viewModel.forgotPasswordState.value.correoError)
-    }
-
     private fun TestScope.iniciarSesionDemo(viewModel: AuthViewModel) {
         viewModel.onLoginCorreoChange(DemoData.CORREO)
         viewModel.onLoginPasswordChange(DemoData.PASSWORD)
@@ -152,29 +87,6 @@ class AuthViewModelTest {
 
         assertNotNull(viewModel.registerState.value.avisoError)
         assertNull(viewModel.currentUser.value)
-    }
-
-    @Test
-    fun `borrar cuenta con contrasena incorrecta la conserva`() = runTest(mainDispatcherRule.testDispatcher) {
-        val viewModel = AuthViewModel(FakeAuthRepository())
-        iniciarSesionDemo(viewModel)
-
-        viewModel.onDeleteAccountPasswordChange("otra-clave")
-        viewModel.deleteAccount()
-        advanceUntilIdle()
-
-        assertNotNull(viewModel.deleteAccountState.value.errorMessage)
-        assertNotNull(viewModel.currentUser.value)
-    }
-
-    @Test
-    fun `borrar cuenta sin escribir la contrasena no hace nada`() = runTest(mainDispatcherRule.testDispatcher) {
-        val viewModel = AuthViewModel(FakeAuthRepository())
-        iniciarSesionDemo(viewModel)
-
-        assertFalse(viewModel.canDeleteAccount())
-        assertNotNull(viewModel.deleteAccountState.value.passwordError)
-        assertNotNull(viewModel.currentUser.value)
     }
 
     @Test

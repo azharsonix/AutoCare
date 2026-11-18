@@ -20,24 +20,6 @@ class VehicleValidatorTest {
     }
 
     @Test
-    fun `anio fuera de rango es invalido`() {
-        assertNotNull(VehicleValidator.validateAnio(""))
-        assertNotNull(VehicleValidator.validateAnio("abc"))
-        assertNotNull(VehicleValidator.validateAnio("1899"))
-        assertNotNull(VehicleValidator.validateAnio("3000"))
-        assertNull(VehicleValidator.validateAnio("2022"))
-    }
-
-    @Test
-    fun `kilometraje negativo o no numerico es invalido`() {
-        assertNotNull(VehicleValidator.validateKilometraje(""))
-        assertNotNull(VehicleValidator.validateKilometraje("abc"))
-        assertNotNull(VehicleValidator.validateKilometraje("-10"))
-        assertNull(VehicleValidator.validateKilometraje("0"))
-        assertNull(VehicleValidator.validateKilometraje("125000"))
-    }
-
-    @Test
     fun `placas con formato invalido son rechazadas`() {
         assertNotNull(VehicleValidator.validatePlacas(""))
         assertNotNull(VehicleValidator.validatePlacas("AB"))

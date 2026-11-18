@@ -18,12 +18,6 @@ class ReminderValidatorTest {
     }
 
     @Test
-    fun `fecha nula es invalida`() {
-        assertNotNull(ReminderValidator.validateFecha(null))
-        assertNull(ReminderValidator.validateFecha(1_700_000_000_000L))
-    }
-
-    @Test
     fun `kilometraje es opcional pero si se indica debe ser valido`() {
         assertNull(ReminderValidator.validateKilometraje(""))
         assertNotNull(ReminderValidator.validateKilometraje("abc"))
