@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import androidx.room.Upsert
 
 @Dao
 interface UserDao {
@@ -19,7 +20,7 @@ interface UserDao {
     @Insert
     suspend fun insert(user: UserEntity)
 
-    @Update
+        @Update
     suspend fun update(user: UserEntity)
 }
 
@@ -38,6 +39,9 @@ interface VehicleDao {
     @Insert
     suspend fun insert(vehicle: VehicleEntity)
 
+    @Upsert
+    suspend fun upsert(vehicle: VehicleEntity)
+
     /** Devuelve el número de filas actualizadas (0 si el vehículo no existe). */
     @Update
     suspend fun update(vehicle: VehicleEntity): Int
@@ -53,6 +57,9 @@ interface MaintenanceDao {
 
     @Insert
     suspend fun insert(maintenance: MaintenanceEntity)
+
+    @Upsert
+    suspend fun upsert(maintenance: MaintenanceEntity)
 
     @Update
     suspend fun update(maintenance: MaintenanceEntity): Int
@@ -71,6 +78,9 @@ interface ExpenseDao {
 
     @Insert
     suspend fun insert(expense: ExpenseEntity)
+
+    @Upsert
+    suspend fun upsert(expense: ExpenseEntity)
 
     @Update
     suspend fun update(expense: ExpenseEntity): Int
@@ -93,6 +103,9 @@ interface ReminderDao {
     @Insert
     suspend fun insert(reminder: ReminderEntity)
 
+    @Upsert
+    suspend fun upsert(reminder: ReminderEntity)
+
     @Update
     suspend fun update(reminder: ReminderEntity): Int
 
@@ -114,6 +127,9 @@ interface DocumentoDao {
 
     @Insert
     suspend fun insert(documento: DocumentoEntity)
+
+    @Upsert
+    suspend fun upsert(documento: DocumentoEntity)
 
     @Update
     suspend fun update(documento: DocumentoEntity): Int
