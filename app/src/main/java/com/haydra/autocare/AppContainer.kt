@@ -64,7 +64,8 @@ class AppContainer(context: Context) {
         AuthRepositoryConNube(
             FirebaseAuthRepository(FirebaseAuth.getInstance(), FirebaseFirestore.getInstance(), database.userDao()),
             sincronizadorNube,
-            alcanceApp
+            alcanceApp,
+            borrarFotos = almacenFotos::borrar
         )
     }
     val vehicleRepository: VehicleRepository by lazy {

@@ -29,6 +29,7 @@ import com.haydra.autocare.data.model.Maintenance
 import com.haydra.autocare.data.model.Reminder
 import com.haydra.autocare.data.plan.Limites
 import com.haydra.autocare.ui.auth.AuthViewModel
+import com.haydra.autocare.ui.auth.AvisoPrivacidadScreen
 import com.haydra.autocare.ui.auth.ForgotPasswordScreen
 import com.haydra.autocare.ui.auth.LoginScreen
 import com.haydra.autocare.ui.auth.ProfileScreen
@@ -67,6 +68,7 @@ private object AutoCareDestinations {
     const val FORGOT_PASSWORD = "forgot-password"
     const val HOME = "home"
     const val PROFILE = "profile"
+    const val AVISO_PRIVACIDAD = "aviso-privacidad"
     const val PRO_ARG = "origen"
     const val PRO = "pro?$PRO_ARG={$PRO_ARG}"
 
@@ -310,8 +312,12 @@ fun AutoCareNavHost(
                         popUpTo(AutoCareDestinations.LOGIN) { inclusive = true }
                     }
                 },
-                onNavigateToLogin = { navController.popBackStack() }
+                onNavigateToLogin = { navController.popBackStack() },
+                onVerAviso = { navController.navigate(AutoCareDestinations.AVISO_PRIVACIDAD) }
             )
+        }
+        composable(AutoCareDestinations.AVISO_PRIVACIDAD) {
+            AvisoPrivacidadScreen(onBack = { navController.popBackStack() })
         }
         composable(AutoCareDestinations.HOME) {
             val usuarioId = currentUser?.id ?: return@composable
@@ -389,7 +395,13 @@ fun AutoCareNavHost(
         composable(AutoCareDestinations.PROFILE) {
             ProfileScreen(
                 viewModel = authViewModel,
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onVerAviso = { navController.navigate(AutoCareDestinations.AVISO_PRIVACIDAD) },
+                onCuentaBorrada = {
+                    navController.navigate(AutoCareDestinations.LOGIN) {
+                        popUpTo(navController.graph.id) { inclusive = true }
+                    }
+                }
             )
         }
         composable(AutoCareDestinations.VEHICLE_NEW) {

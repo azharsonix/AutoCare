@@ -78,6 +78,11 @@ class AlmacenFotos(private val context: Context) {
             ?.forEach { it.delete() }
     }
 
+    /** Borra en ese momento las fotos indicadas (al borrar una cuenta no se espera a la limpieza diaria). */
+    suspend fun borrar(nombres: List<String>) = withContext(Dispatchers.IO) {
+        nombres.forEach { archivo(it).delete() }
+    }
+
     private fun ExifInterface.rotacion(): Int = when (
         getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
     ) {
