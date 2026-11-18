@@ -3,6 +3,8 @@ package com.haydra.autocare
 import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.haydra.autocare.data.catalogo.CatalogoVehiculos
+import com.haydra.autocare.data.catalogo.CatalogoVpic
 import com.haydra.autocare.data.export.ExportadorReporte
 import com.haydra.autocare.data.local.AlmacenFotos
 import com.haydra.autocare.data.local.PlanStore
@@ -81,6 +83,8 @@ class AppContainer(context: Context) {
         DocumentoRepositoryConNube(RoomDocumentoRepository(database.documentoDao()), sincronizadorNube)
     }
 
+    /** API de terceros vPIC (NHTSA): modelos por marca y año, y lectura del número de serie. */
+    val catalogoVehiculos: CatalogoVehiculos by lazy { CatalogoVpic() }
 
     val sessionStore: SessionStore by lazy { SessionStore(appContext) }
     val planRepository: PlanRepository by lazy { PlanStore(appContext) }

@@ -141,7 +141,7 @@ fun AutoCareNavHost(
     val authViewModel: AuthViewModel = viewModel {
         AuthViewModel(container.authRepository, container.sessionStore)
     }
-    val vehicleViewModel: VehicleViewModel = viewModel { VehicleViewModel(container.vehicleRepository) }
+    val vehicleViewModel: VehicleViewModel = viewModel { VehicleViewModel(container.vehicleRepository, container.catalogoVehiculos) }
     val maintenanceViewModel: MaintenanceViewModel = viewModel {
         MaintenanceViewModel(container.maintenanceRepository)
     }
