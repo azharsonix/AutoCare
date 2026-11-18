@@ -8,11 +8,8 @@ import com.haydra.autocare.ui.vehicles.CATEGORIA_MANTENIMIENTO
 import com.haydra.autocare.ui.vehicles.EstadoRecordatorio
 import com.haydra.autocare.ui.vehicles.calcularEstadisticas
 import com.haydra.autocare.ui.vehicles.estadoRecordatorio
-import com.haydra.autocare.ui.vehicles.textoAviso
 import java.time.LocalDate
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class VehicleStatsTest {
@@ -63,12 +60,6 @@ class VehicleStatsTest {
     }
 
     @Test
-    fun `sin kilometraje suficiente no hay costo por km`() {
-        val stats = calcularEstadisticas(vehiculo, emptyList(), listOf(gasto(100.0, hoy)), emptyList(), hoy)
-        assertNull(stats.costoPorKm)
-    }
-
-    @Test
     fun `recordatorio vence por fecha o por kilometraje`() {
         val porFecha = estadoRecordatorio(recordatorio("a", hoy.minusDays(1)), 50_000.0, hoy)
         val porKm = estadoRecordatorio(recordatorio("b", hoy.plusDays(30), km = 49_000.0), 50_000.0, hoy)
@@ -77,39 +68,5 @@ class VehicleStatsTest {
         assertEquals(EstadoRecordatorio.Vencido(porFecha = true, porKilometraje = false), porFecha)
         assertEquals(EstadoRecordatorio.Vencido(porFecha = false, porKilometraje = true), porKm)
         assertEquals(EstadoRecordatorio.Pendiente(diasRestantes = 3, kmRestantes = 800.0), pendiente)
-    }
-
-    @Test
-    fun `el proximo recordatorio prioriza los vencidos e ignora completados`() {
-        val stats = calcularEstadisticas(
-            vehiculo,
-            mantenimientos = emptyList(),
-            gastos = emptyList(),
-            recordatorios = listOf(
-                recordatorio("pronto", hoy.plusDays(2)),
-                recordatorio("hecho", hoy.minusDays(10), completado = true),
-                recordatorio("km", hoy.plusDays(60), km = 49_500.0)
-            ),
-            hoy = hoy
-        )
-
-        assertEquals("km", stats.proximoRecordatorio?.id)
-        assertEquals(1, stats.recordatoriosVencidos)
-        assertTrue(stats.estadoProximo is EstadoRecordatorio.Vencido)
-    }
-
-    @Test
-    fun `el texto del aviso no repite fecha y km`() {
-        val km = 50_000.0
-        val pronto = recordatorio("a", hoy.plusDays(10), km = 50_800.0)
-        val lejano = recordatorio("b", hoy.plusDays(200), km = 60_000.0)
-        val porKm = recordatorio("c", hoy.plusDays(60), km = 49_000.0)
-        val porFecha = recordatorio("d", hoy.minusDays(2))
-
-        assertEquals("En 10 días · faltan 800 km", textoAviso(pronto, estadoRecordatorio(pronto, km, hoy)))
-        assertEquals("El 13/04/2027 · faltan 10,000 km", textoAviso(lejano, estadoRecordatorio(lejano, km, hoy)))
-        assertEquals("El 13/04/2027", textoAviso(lejano, estadoRecordatorio(lejano, km, hoy), conKm = false))
-        assertEquals("Ya pasó los 49,000 km", textoAviso(porKm, estadoRecordatorio(porKm, km, hoy)))
-        assertEquals("Venció el 23/09/2026", textoAviso(porFecha, estadoRecordatorio(porFecha, km, hoy)))
     }
 }

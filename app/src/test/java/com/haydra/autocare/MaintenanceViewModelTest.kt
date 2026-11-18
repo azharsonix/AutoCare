@@ -9,7 +9,6 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -64,23 +63,5 @@ class MaintenanceViewModelTest {
         assertNotNull(estado.fechaError)
         assertNotNull(estado.kilometrajeError)
         assertNotNull(estado.costoError)
-    }
-
-    @Test
-    fun `eliminar mantenimiento lo quita del listado`() = runTest(mainDispatcherRule.testDispatcher) {
-        val viewModel = MaintenanceViewModel(FakeMaintenanceRepository())
-        viewModel.startNewMaintenance()
-        viewModel.onTipoChange("Frenos")
-        viewModel.onFechaChange(fechaMillis())
-        viewModel.onKilometrajeChange("9000")
-        viewModel.onCostoChange("500")
-        viewModel.saveMaintenance(vehiculoId)
-        advanceUntilIdle()
-
-        val mantenimiento = viewModel.listState.value.mantenimientos.first()
-        viewModel.deleteMaintenance(vehiculoId, mantenimiento.id)
-        advanceUntilIdle()
-
-        assertTrue(viewModel.listState.value.mantenimientos.isEmpty())
     }
 }

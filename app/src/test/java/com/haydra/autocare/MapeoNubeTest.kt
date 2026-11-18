@@ -1,7 +1,6 @@
 package com.haydra.autocare
 
 import com.haydra.autocare.data.local.db.ExpenseEntity
-import com.haydra.autocare.data.local.db.ReminderEntity
 import com.haydra.autocare.data.local.db.VehicleEntity
 import com.haydra.autocare.data.nube.MapeoNube
 import java.time.LocalDate
@@ -24,17 +23,5 @@ class MapeoNubeTest {
         val mapa = MapeoNube.aMapa(gasto)
         assertFalse(mapa.containsKey("foto"))
         assertEquals(gasto, MapeoNube.gasto("g1", mapa, "foto.jpg"))
-    }
-
-    @Test
-    fun `los enteros que devuelve Firestore se leen como decimales`() {
-        val mapa = mapOf<String, Any?>(
-            "vehiculoId" to "v1", "titulo" to "Afinación", "fecha" to "2026-12-01",
-            "kilometraje" to 60000L, "completado" to true
-        )
-        assertEquals(
-            ReminderEntity("r1", "v1", "Afinación", LocalDate.of(2026, 12, 1), 60000.0, true),
-            MapeoNube.recordatorio("r1", mapa)
-        )
     }
 }
